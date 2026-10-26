@@ -26,12 +26,17 @@ db.serialize(() => {
 app.post("/login-vulnerable", (req, res) => { 
   const { username, password } = req.body;
 
+  /*
+   Corrección de vulnerabilidad
+   */
+  const query =
+    "SELECT id, username FROM users WHERE username = ? AND password = ?";
+  const params = [username, password];
 
-  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+  // No mostramos los parámetros para evitar registrar contraseñas en consola.
+  console.log("Consulta parametrizada ejecutada:", query);
 
-  console.log("Query ejecutada:", query); 
-
-  db.get(query, (err, row) => {
+  db.get(query, params, (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (row) return res.json({ ok: true, user: row.username });
     res.status(401).json({ ok: false, message: "Credenciales inválidas" });
